@@ -1,14 +1,31 @@
 const express = require('express')
 const app = express()
 
-let notes = [  {    id: 1,    content: "HTML is easy",    important: true  },  {    id: 2,    content: "Browser can execute only JavaScript",    important: false  },  {    id: 3,    content: "GET and POST are the most important methods of HTTP protocol",    important: true  }]
+let persons = [
+    {
+      name: "Arto Hellas",
+      number: "040-123456",
+      id: 1
+    },
+    {
+      name: "Ada Lovelace",
+      number: "39-44-5323523",
+      id: 2
+    },
+    {
+      name: "Dan Abramov",
+      number: "12-43-234345",
+      id: 3
+    },
+    {
+      name: "Mary Poppendieck",
+      number: "39-23-6423122",
+      id: 4
+    }
+  ]
 
-app.get('/', (req, res) => {
-  res.send('<h1>Hello World!</h1>')
-})
-
-app.get('/api/notes', (req, res) => {
-  res.json(notes)
+app.get('/api/persons', (req, res) => {
+  res.json(persons)
 })
 
 const PORT = 3001
