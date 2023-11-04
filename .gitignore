@@ -3,6 +3,8 @@
 # Other folders #
 part3
 node_modules
+notes_front
+notes_back
 
 # Other files #
 db.json

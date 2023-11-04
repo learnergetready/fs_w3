@@ -3,6 +3,7 @@ var morgan = require('morgan')
 const app = express()
 
 app.use(express.json())
+app.use(express.static('dist'))
 app.use(morgan((tokens, req, res) => {
   const loggedData =  [
      tokens.method(req, res),
@@ -87,7 +88,7 @@ app.get('/info', (req, res) => {
   res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${dateTime}</p>`)
 })
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
