@@ -57,9 +57,12 @@ const App = () => {
           .update({ ...oldPerson, number: newNumber})
             .then( returnedPerson => {
               setPersons(persons.map( person => person.id !== returnedPerson.id ? person : returnedPerson ))
-              showNotification(`Changed the phonenumber for ${returnedPerson.name}`, "red")
+              showNotification(`Changed the phonenumber for ${returnedPerson.name}`)
             })
-            .catch(error => handleError(error))
+            .catch(error => {
+              setPersons(persons.filter(person => person.id !== oldPerson.id))
+              handleError(error)
+            })
       }
     }
     setNewName("")

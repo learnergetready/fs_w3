@@ -21,7 +21,12 @@ const personSchema = new mongoose.Schema({
   },
   number: {
     type: String,
-    required: true
+    minlength: 8,
+    required: true,
+    validate: {
+      validator: v => /^\d{2,3}-\d*/.test(v),
+      message: () => "Phone number format wrong! Should be XX-XXXXXXXX or XXX-XXXXXXX"
+    }
   },
 })
 
