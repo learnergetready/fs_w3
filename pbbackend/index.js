@@ -19,30 +19,26 @@ app.use(morgan((tokens, req, res) => {
   return loggedData.join(' ')
 }))
 
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
 
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
 
-let persons = [
-    {
-      name: "Arto Hellas",
-      number: "040-123456",
-      id: 1
-    },
-    {
-      name: "Ada Lovelace",
-      number: "39-44-5323523",
-      id: 2
-    },
-    {
-      name: "Dan Abramov",
-      number: "12-43-234345",
-      id: 3
-    },
-    {
-      name: "Mary Poppendieck",
-      number: "39-23-6423122",
-      id: 4
-    }
-  ]
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).send({ error: error.message })
+  } else if (error.name === 'NameInUse') {
+    return response.status(400).send({error: 'name must be unique'})
+  } else if (error.name === 'NotInDB') {
+    return response.status(400).send({error: 'Person not in database'})
+  }
+
+  next(error)
+}
+
 
 app.get('/api/persons', (req, res, next) => {
   Person.find({})
@@ -59,7 +55,7 @@ app.get('/api/persons/:id', (req, res, next) => {
       if (person) {
         res.json(person)
       } else {
-        res.status(404).end()
+        throw({name: 'NotInDB'})
       }})
     .catch(error => next(error))
     })
@@ -74,36 +70,39 @@ app.delete('/api/persons/:id', (req, res, next) => {
 
 app.post('/api/persons', (req, res, next) => {
   const {name, number} = req.body
-
-  if(!name || !number) {
-    return res.status(400).json({
-      error: 'name or number is missing'
-    })
-  }
-
-  const person = new Person({
-    name: name,
-    number: number,
-  })
-  /*
-  if(Person.find({})) {
-    return res.status(400).json({
-      error: 'name must be unique'
-    })
-  }*/
   
-  person.save()
-    .then(savedPerson => {
-      res.json(savedPerson)
+  Person.exists({name:name})
+    .then(doesExist => {
+      if(doesExist) {
+        throw({name: 'NameInUse'})
+      } else {
+        const person = new Person({
+          name: name,
+          number: number,
+        })
+      
+        person.save()
+          .then(savedPerson => {
+            res.json(savedPerson)
+          })
+      }
     })
     .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (req, res, next) => {
   const {name, number} = req.body
-  Person.findByIdAndUpdate(req.params.id, {name, number}, {new:true})
+  Person.findByIdAndUpdate(
+    req.params.id,
+    {name, number},
+    {new:true, runValidators:true, context:'query'}
+  )
     .then(updatedPerson => {
-      res.json(updatedPerson)
+      if(updatedPerson) {
+        res.json(updatedPerson)
+      } else {
+        throw({name: 'NotInDB'})
+      }
     })
     .catch(error => next(error))
 })
@@ -123,21 +122,5 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
-}
-
-// olemattomien osoitteiden käsittely
 app.use(unknownEndpoint)
-
-const errorHandler = (error, request, response, next) => {
-  console.error(error.message)
-
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
-  }
-
-  next(error)
-}
-
 app.use(errorHandler)

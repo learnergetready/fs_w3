@@ -10,7 +10,7 @@ const App = () => {
 
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
-  const [newNumber, setNewNumber] = useState('+358')
+  const [newNumber, setNewNumber] = useState('')
   const [filterNames, setNewFilterNames] = useState('')
   const [notification, setNotification] = useState(null)
   const [notificationColor, setNotificationColor] = useState(undefined)
@@ -19,6 +19,7 @@ const App = () => {
     peopleService
       .getAll()
       .then( initialPeople => setPersons(initialPeople))
+      .catch(error => handleError(error))
   }, [])
 
   const showNotification = (message, color) => {
@@ -27,15 +28,15 @@ const App = () => {
     setTimeout( () => {
       setNotification(null)
       setNotificationColor(undefined)
-    }, 3000)
+    }, 5000)
   }
 
-  const handleErrorAlreadyDeleted = (removedPerson) => {
-    showNotification(`Information of ${removedPerson.name} has already been removed from the server`, "red")
-    setPersons(persons.filter(person => person.id !== removedPerson.id))
+  const handleError = (error) => {
+    console.log(error.response.data)
+    showNotification(error.response.data.error, "red")
   }
 
-  const addPerson = (event) => {
+    const addPerson = (event) => {
     event.preventDefault()
 
 
@@ -48,7 +49,7 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           showNotification(`Added ${returnedPerson.name}`)
           })
-          .catch(() => handleErrorAlreadyDeleted(newPerson))
+          .catch(error => handleError(error))
      } else {
       if(window.confirm(`${newName} is already added to Phonebook, replace the old number with a new one?`)) {
         const oldPerson = persons.find(person => person.name === newName)
@@ -58,11 +59,11 @@ const App = () => {
               setPersons(persons.map( person => person.id !== returnedPerson.id ? person : returnedPerson ))
               showNotification(`Changed the phonenumber for ${returnedPerson.name}`, "red")
             })
-            .catch(() => handleErrorAlreadyDeleted(oldPerson))
+            .catch(error => handleError(error))
       }
     }
     setNewName("")
-    setNewNumber("+358")
+    setNewNumber("")
   }
 
   const handleFilter = (event) => setNewFilterNames(event.target.value)
@@ -77,7 +78,7 @@ const App = () => {
           setPersons(persons.filter(person => person.id !== nixedPerson.id))
           showNotification(`Deleted ${nixedPerson.name}`)
         })
-          .catch(() => handleErrorAlreadyDeleted(nixedPerson))
+        .catch(error => handleError(error))
     }
   }
 
