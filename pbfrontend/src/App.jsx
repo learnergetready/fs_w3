@@ -4,7 +4,6 @@ import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import Notification from './components/Notification'
 import peopleService from './services/persons'
-import axios from 'axios'
 
 const App = () => {
 
@@ -33,7 +32,7 @@ const App = () => {
 
   const handleError = (error) => {
     console.log(error.response.data)
-    showNotification(error.response.data.error, "red")
+    showNotification(error.response.data.error || "data not available", "red")
   }
 
     const addPerson = (event) => {

@@ -8,12 +8,12 @@ app.use(express.static('dist'))
 app.use(express.json())
 app.use(morgan((tokens, req, res) => {
   const loggedData =  [
-     tokens.method(req, res),
-     tokens.url(req, res),
-     tokens.status(req, res),
-     tokens.res(req, res, 'content-length'), '-',
-     tokens['response-time'](req, res), 'ms',
-     JSON.stringify(req.body)
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms',
+    JSON.stringify(req.body)
   ]
 
   return loggedData.join(' ')
@@ -24,7 +24,7 @@ const unknownEndpoint = (request, response) => {
 }
 
 const errorHandler = (error, request, response, next) => {
-  console.error("logging an error!!")
+  console.error('logging an error!!')
   console.error(error.name, error.message)
 
   if (error.name === 'CastError') {
@@ -32,9 +32,9 @@ const errorHandler = (error, request, response, next) => {
   } else if (error.name === 'ValidationError') {
     return response.status(400).send({ error: error.message })
   } else if (error.name === 'NameInUse') {
-    return response.status(400).send({error: 'name must be unique'})
+    return response.status(400).send({ error: 'name must be unique' })
   } else if (error.name === 'NotInDB') {
-    return response.status(400).send({error: 'Person not in database'})
+    return response.status(400).send({ error: 'Person not in database' })
   }
 
   next(error)
@@ -47,7 +47,7 @@ app.get('/api/persons', (req, res, next) => {
       res.json(people)
     })
     .catch(error => next(error))
-  })
+})
 
 
 app.get('/api/persons/:id', (req, res, next) => {
@@ -56,32 +56,32 @@ app.get('/api/persons/:id', (req, res, next) => {
       if (person) {
         res.json(person)
       } else {
-        throw({name: 'NotInDB'})
+        throw({ name: 'NotInDB' })
       }})
     .catch(error => next(error))
-    })
+})
 
 app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndDelete(req.params.id)
-    .then(result => {
+    .then( () => {
       res.status(204).end()
     })
     .catch(error => next(error))
-  })
+})
 
 app.post('/api/persons', (req, res, next) => {
-  const {name, number} = req.body
-  
-  Person.exists({name:name})
+  const { name, number } = req.body
+
+  Person.exists({ name:name })
     .then(doesExist => {
       if(doesExist) {
-        throw({name: 'NameInUse'})
+        throw({ name: 'NameInUse' })
       } else {
         const person = new Person({
           name: name,
           number: number,
         })
-      
+
         person.save()
           .then(savedPerson => {
             res.json(savedPerson)
@@ -93,24 +93,24 @@ app.post('/api/persons', (req, res, next) => {
 })
 
 app.put('/api/persons/:id', (req, res, next) => {
-  const {name, number} = req.body
+  const { name, number } = req.body
   Person.findByIdAndUpdate(
     req.params.id,
-    {name, number},
-    {new:true, runValidators:true, context:'query'}
+    { name, number },
+    { new:true, runValidators:true, context:'query' }
   )
     .then(updatedPerson => {
       if(updatedPerson) {
         res.json(updatedPerson)
       } else {
-        throw({name: 'NotInDB'})
+        throw({ name: 'NotInDB' })
       }
     })
     .catch(error => next(error))
 })
 
 app.get('/info', (req, res, next) => {
-  
+
   Person.find({})
     .then(persons => {
       const dateTime = new Date()

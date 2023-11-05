@@ -31,8 +31,8 @@ if(process.argv.length > 3) {
   const addPersonNumbered = process.argv[4]
 
   const person = new Person({
-      name: addPersonNamed,
-      number: addPersonNumbered,
+    name: addPersonNamed,
+    number: addPersonNumbered,
   })
 
   person.save().then(result => {
