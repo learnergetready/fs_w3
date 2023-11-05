@@ -8,6 +8,7 @@ notes_back
 
 # Other files #
 db.json
+.env
 
 # Compiled source #
 ###################

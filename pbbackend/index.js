@@ -1,5 +1,7 @@
+require('dotenv').config()
 const express = require('express')
 var morgan = require('morgan')
+const Person = require('./models/person')
 const app = express()
 
 app.use(express.json())
@@ -16,7 +18,6 @@ app.use(morgan((tokens, req, res) => {
 
   return loggedData.join(' ')
 }))
-
 
 let persons = [
     {
@@ -42,8 +43,11 @@ let persons = [
   ]
 
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
-})
+  Person.find({}).then(people => {
+    res.json(people)
+  })
+  })
+
 
 app.get('/api/persons/:id', (req, res) => {
   const id = Number(req.params.id)
@@ -63,24 +67,28 @@ app.delete('/api/persons/:id', (req, res) => {
 })
 
 app.post('/api/persons', (req, res) => {
-  const person = {...req.body}
+  const {name, number} = req.body
 
-  if(!person.name || !person.number) {
+  if(!name || !number) {
     return res.status(400).json({
       error: 'name or number is missing'
     })
   }
 
-  if(persons.find(p => p.name === person.name)) {
+  const person = new Person({
+    name: name,
+    number: number,
+  })
+  /*
+  if(Person.find({})) {
     return res.status(400).json({
       error: 'name must be unique'
     })
-  }
-
-  person.id = Math.round(Math.random()*1000000)
-  persons = persons.concat(person)
-
-  res.json(person)
+  }*/
+  
+  person.save().then(savedPerson => {
+    res.json(savedPerson)
+  })
 })
 
 app.get('/info', (req, res) => {
