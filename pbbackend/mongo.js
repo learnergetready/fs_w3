@@ -19,7 +19,12 @@ const personSchema = new mongoose.Schema({
 })
 
 const Person = mongoose.model('Person', personSchema)
-
+/*
+Person.findByIdAndDelete(process.argv[3])
+    .then(result => {
+      console.log(result)
+    })
+*/
 
 if(process.argv.length > 3) {
   const addPersonNamed = process.argv[3]
@@ -42,6 +47,7 @@ if(process.argv.length > 3) {
     mongoose.connection.close()
   })
 }
+
 
 /*ALKU-UKOT
 [
